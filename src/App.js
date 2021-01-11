@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { nbSubNetsToMask, validateMask } from './utils'
 import useNet from './useNet'
+import Notifications from './Notifications'
 
 function isNumeric(str) {
   if (typeof str != "string" || /\./.test(str))
@@ -24,8 +25,15 @@ function animateTarget(e, bgColor) {
   setTimeout(() => target.classList.toggle(bgColor), 250)
 }
 
-
 function App() {
+
+  const [notifications, setNotifications] = useState([])
+
+  function notify(text, type = 'success') {
+    const notification =  { id: Math.ceil(Math.random() * 1000000), text, type}
+    setNotifications([...notifications, notification])
+    setTimeout(() => setNotifications(notifications => notifications.filter(nft => nft.id !== notification.id)), 2000)
+  }
 
   const [ip, setIp] = useState("192.168.1.1");
   const [mask, setMask] = useState("")
@@ -73,6 +81,11 @@ function App() {
 
   return (
     <div className="flex flex-col max-w-2xl min-h-screen px-4 mx-auto">
+      {notifications.length !== 0
+        ? <Notifications notifications={notifications} />
+        : <></>
+      }
+
       {/* box1 */}
       <div className="flex-auto mt-10">
         {/* inputs */}
@@ -87,13 +100,14 @@ function App() {
         {/* table */}
         <div className="mt-8 overflow-x-auto font-mono">
           <table className="w-full">
-            <thead></thead>
             <tbody>
             {dataMask.filter(i => i.show).map((item, index) => (
               <tr className="border border-gray-400" key={index}>
                 <td className="p-1 tracking-tight select-none">{ item.text }</td>
                 <td className="p-1 whitespace-no-wrap border-l select-none"
-                  onDoubleClick={(e) => copyToCliboard((item.value + "").replace(/\s/g, "")) || animateTarget(e, "bg-green-200")}
+                  onDoubleClick={(e) => copyToCliboard((item.value + "").replace(/\s/g, ""))
+                    || animateTarget(e, "bg-green-200")
+                    || notify(`copied ${index + 1}`)}
                 >{ item.value }</td>
               </tr>
             ))}
