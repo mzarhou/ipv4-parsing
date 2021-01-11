@@ -32,7 +32,7 @@ function App() {
   function notify(text, type = 'success') {
     const notification =  { id: Math.ceil(Math.random() * 1000000), text, type}
     setNotifications([...notifications, notification])
-    setTimeout(() => setNotifications(notifications => notifications.filter(nft => nft.id !== notification.id)), 2000)
+    setTimeout(() => setNotifications(notifications => notifications.filter(nft => nft.id !== notification.id)), 1000)
   }
 
   const [ip, setIp] = useState("192.168.1.1");
@@ -107,7 +107,7 @@ function App() {
                 <td className="p-1 whitespace-no-wrap border-l select-none"
                   onDoubleClick={(e) => copyToCliboard((item.value + "").replace(/\s/g, ""))
                     || animateTarget(e, "bg-green-200")
-                    || notify(`copied ${index + 1}`)}
+                    || notify(`copied`)}
                 >{ item.value }</td>
               </tr>
             ))}
