@@ -1,39 +1,13 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { nbSubNetsToMask, validateMask } from './utils'
+import { useState, useEffect, useMemo } from 'react';
+import { nbSubNetsToMask, validateMask, isNumeric } from './utils'
 import useNet from './useNet'
-import Notifications from './Notifications'
+import Notifications from './components/app/Notifications'
+import useDoubleClickCopy from './composables/useDoubleClickCopy';
+import cx from 'classnames';
 
-function isNumeric(str) {
-  if (typeof str != "string" || /\./.test(str))
-    return false // we only process strings!
-  return !isNaN(str) // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
-         && !isNaN(parseInt(str)) // ...and ensure strings of whitespace fail
-}
-
-function copyToCliboard(str) {
-  const el = document.createElement('textarea');
-  el.value = str;
-  document.body.appendChild(el);
-  el.select();
-  document.execCommand('copy');
-  document.body.removeChild(el);
-}
-
-function animateTarget(e, bgColor) {
-  let target = e.target;
-  target.classList.toggle(bgColor)
-  setTimeout(() => target.classList.toggle(bgColor), 250)
-}
 
 function App() {
-
-  const [notifications, setNotifications] = useState([])
-
-  function notify(text, type = 'success') {
-    const notification =  { id: Math.ceil(Math.random() * 1000000), text, type}
-    setNotifications([...notifications, notification])
-    setTimeout(() => setNotifications(notifications => notifications.filter(nft => nft.id !== notification.id)), 1000)
-  }
+  const handleDoubleClick = useDoubleClickCopy();
 
   const [ip, setIp] = useState("192.168.1.1");
   const [mask, setMask] = useState("")
@@ -81,23 +55,14 @@ function App() {
 
   return (
     <div className="flex flex-col max-w-2xl min-h-screen px-4 mx-auto">
-      {notifications.length !== 0
-        ? <Notifications notifications={notifications} />
-        : <></>
-      }
-
-      {/* box1 */}
+      <Notifications />
       <div className="flex-auto mt-10">
-        {/* inputs */}
         <input value={ip} placeholder="IP" onChange={(e) => setIp(e.target.value)}
-          className={`block w-full px-4 py-2 text-xl border rounded-sm ${validMaskIp ? 'border-green-500' : ''}`}
+          className={cx({'border-green-500': validMaskIp}, 'block w-full px-4 py-2 text-xl border rounded-sm')}
         />
         <input value={maskOrNbSubNets} onChange={(e) => setMaskOrNbSubNets(e.target.value)} placeholder="Masque ou nombre de sous-reseaux"
-          className={`block w-full px-4 py-2 mt-4 text-xl border rounded-sm ${validMaskIp ? 'border-green-500' : ''}`}
+          className={cx({'border-green-500': validMaskIp}, 'block w-full px-4 py-2 mt-4 text-xl border rounded-sm')}
         />
-        {/* // inputs */}
-
-        {/* table */}
         <div className="mt-8 overflow-x-auto font-mono">
           <table className="w-full">
             <tbody>
@@ -105,19 +70,14 @@ function App() {
               <tr className="border border-gray-400" key={index}>
                 <td className="p-1 tracking-tight select-none">{ item.text }</td>
                 <td className="p-1 whitespace-no-wrap border-l select-none"
-                  onDoubleClick={(e) => copyToCliboard((item.value + "").replace(/\s/g, ""))
-                    || animateTarget(e, "bg-green-200")
-                    || notify(`copied`)}
+                  onDoubleClick={(e) => handleDoubleClick(item.value, e.target)}
                 >{ item.value }</td>
               </tr>
             ))}
             </tbody>
           </table>
         </div>
-        {/* // table */}
       </div>
-
-      {/* box2 */}
       <ul className="mt-2 text-xs text-gray-600">
         <li>- nb: nombre de</li>
         <li>- @ : addresse</li>

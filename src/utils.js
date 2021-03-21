@@ -3,6 +3,13 @@ const maskRegexA = /\b(255)\.(0|128|192|224|240|248|252|254)\.(0)\.(0)\b/
 const maskRegexB = /\b(255)\.(255)\.(0|128|192|224|240|248|252|254)\.(0)\b/
 const maskRegexC = /\b(255)\.(255)\.(255)\.(0|128|192|224|240|248|252|254)\b/
 
+export function isNumeric(str) {
+    if (typeof str != "string" || /\./.test(str))
+        return false // we only process strings!
+    return !isNaN(str) // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
+            && !isNaN(parseInt(str)) // ...and ensure strings of whitespace fail
+}
+
 export function getAddNet(ip, mask) {
     if (!ipRegex.test(ip) || !ipRegex.test(mask))
         return null
